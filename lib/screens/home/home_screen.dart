@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo/screens/home/tabs/list/list_tabs.dart';
 import 'package:todo/screens/home/tabs/settings/settings_tab.dart';
-import 'package:todo/ui/screens/bottom_sheets/app_bottom_sheet.dart';
+import 'package:todo/ui/screens/bottom_sheets/add_bottom_sheet.dart';
 import 'package:todo/ui/utilts/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: MediaQuery
                     .of(context)
                     .viewInsets,
-                child: const AddBottomSheet(),
+                child: AddBottomSheet(),
               ));
         },
         child: const Icon(Icons.add),
