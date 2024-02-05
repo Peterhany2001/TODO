@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo/moodels/todoDM.dart';
 import 'package:todo/ui/comman/my_text_field.dart';
+import 'package:todo/ui/provider/list_provider.dart';
 import 'package:todo/ui/utilts/AppTheme.dart';
 import 'package:todo/ui/utilts/app_colors.dart';
 
@@ -14,9 +16,11 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
   TextEditingController titleController = TextEditingController();
   TextEditingController DescriptionContrroller = TextEditingController();
   DateTime selectedDate = DateTime.now();
+  late ListProvider provider;
 
   @override
   Widget build(BuildContext context) {
+    provider=Provider.of(context);
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Container(
@@ -82,6 +86,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
       "date": selectedDate,
       "isDone": false,
     }).timeout(Duration(milliseconds: 300), onTimeout: () {
+      provider.refreshTodoList();
       Navigator.pop(context);
     });
   }

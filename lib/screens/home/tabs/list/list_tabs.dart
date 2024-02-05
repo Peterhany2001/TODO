@@ -1,9 +1,10 @@
-
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo/moodels/todoDM.dart';
 import 'package:todo/screens/home/tabs/list/todo_widget/todo_widget.dart';
+import 'package:todo/ui/provider/list_provider.dart';
 import 'package:todo/ui/utilts/app_colors.dart';
 
 class ListTab extends StatefulWidget {
@@ -12,13 +13,19 @@ class ListTab extends StatefulWidget {
 }
 
 class _ListTabState extends State<ListTab> {
-  List<TodoDM> todos = [];
+  late ListProvider provider;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      provider.refreshTodoList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (todos.isEmpty) {
-      refreshTodoList();
-    }
+    provider = Provider.of(context);
+
     return Column(
       children: [
         Container(
@@ -40,10 +47,13 @@ class _ListTabState extends State<ListTab> {
                 ],
               ),
               CalendarTimeline(
-                initialDate: DateTime.now(),
+                initialDate: provider.selectDate,
                 firstDate: DateTime.now().subtract(Duration(days: 365)),
                 lastDate: DateTime.now().add(Duration(days: 365)),
-                onDateSelected: (date) => print(date),
+                onDateSelected: (date) {
+                  provider.selectDate = date;
+                  provider.refreshTodoList();
+                },
                 leftMargin: 20,
                 monthColor: AppColors.white,
                 dayColor: AppColors.primary,
@@ -56,32 +66,12 @@ class _ListTabState extends State<ListTab> {
         ),
         Expanded(
           child: ListView.builder(
-              itemCount: todos.length,
+              itemCount: provider.todos.length,
               itemBuilder: (context, index) => TodoWidget(
-                    model: todos[index],
+                    model: provider.todos[index],
                   )),
         ),
       ],
     );
-  }
-
-  refreshTodoList() async {
-    CollectionReference<TodoDM> todoCollection = FirebaseFirestore.instance
-        .collection(TodoDM.collectionName)
-        .withConverter<TodoDM>(fromFirestore: (docSnapShot, _) {
-      Map json = docSnapShot.data() as Map;
-      TodoDM todo = TodoDM.fromJson(json);
-      return todo;
-    }, toFirestore: (todoDm, _) {
-      return todoDm.toJson();
-    });
-    QuerySnapshot<TodoDM> todoSnapshot = await todoCollection.get();
-
-    List<QueryDocumentSnapshot<TodoDM>> docs = todoSnapshot.docs;
-
-    for (int i = 0; i < docs.length; i++) {
-     todos.add(docs[i].data());
-    }
-    setState(() {});
   }
 }
